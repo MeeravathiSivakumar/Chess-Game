@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>FUTECX CHESS V2</title>
+    <!-- Import beautiful Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Montserrat:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Include Three.js and OrbitControls from highly stable CDNs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+    <!-- App Container -->
+    <div id="app">
+        <!-- 1️⃣ Splash Screen -->
+        <main id="splash-screen" class="active-screen">
+            <div class="splash-logo-container">
+                <div class="splash-3d-symbol">
+                    <div class="3d-spinning-king"></div>
+                </div>
+                <h1 class="splash-title">FUTECX CHESS</h1>
+                <p class="splash-tagline">Rise From Pawn To Legend</p>
+                <div class="splash-loading-bar">
+                    <div class="splash-loading-progress" id="splash-progress"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 2️⃣ Login Screen -->
+        <main id="login-screen" class="hidden-screen">
+            <div class="login-card">
+                <div style="font-size: 44px; margin-bottom: 12px; filter: drop-shadow(0 0 10px #dfb76c);">🏆</div>
+                <h2 class="login-header-logo">FUTECX CHESS V3</h2>
+                <p class="login-header-subtitle">Build Your Golden Career</p>
+                
+                <div class="login-btn-group">
+                    <button class="btn btn-google" onclick="handleGoogleLoginClick()"></button>
+                    
+                    <button class="btn" style="background: rgba(223, 183, 108, 0.1); border-color: rgba(223, 183, 108, 0.4); color: var(--gold); padding: 14px; font-weight: 800; border-radius: 6px;" onclick="showEmailForm()">
+                        📧 LOGIN WITH EMAIL
+                    </button>
+                    <button class="btn btn-outline" style="border-color: rgba(255,255,255,0.15); padding: 12px; border-radius: 6px; font-size: 11px;" onclick="showEmailRegisterForm()">
+                        CREATE ACCOUNT
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- 3️⃣ First Time Profile Setup Screen -->
+        <main id="setup-screen" class="hidden-screen">
+            <div class="setup-card">
+                <h2 style="font-family: var(--font-display); color: #fff; font-size: 18px; letter-spacing: 2px; margin-bottom: 8px;">CREATING YOUR LEGEND PROFILE</h2>
+                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 20px;">Personalize your profile to enter the competitive ladder.</p>
+                
+                <div class="setup-input-group">
+                    <label class="setup-label">Choose Username</label>
+                    <input type="text" id="setup-username-input" class="setup-input-field" placeholder="Enter gamer tag..." maxlength="14" value="PlayerOne" oninput="filterUsernameEmojiInput(this)">
+                </div>
+                
+                <div class="setup-input-group">
+                    <label class="setup-label">Select Avatar Icon</label>
+                    <div class="avatar-setup-grid">
+                        <div class="avatar-setup-item selected" onclick="selectSetupAvatar(this, '♟️')" data-emoji="♟️">♟️</div>
+                        <div class="avatar-setup-item" onclick="selectSetupAvatar(this, '♞')" data-emoji="♞">♞</div>
+                        <div class="avatar-setup-item" onclick="selectSetupAvatar(this, '♝')" data-emoji="♝">♝</div>
+                        <div class="avatar-setup-item" onclick="selectSetupAvatar(this, '♜')" data-emoji="♜">♜</div>
+                        <div class="avatar-setup-item" onclick="selectSetupAvatar(this, '♛')" data-emoji="♛">♛</div>
+                        <div class="avatar-setup-item" onclick="selectSetupAvatar(this, '♚')" data-emoji="♚">♚</div>
+                        <div class="avatar-setup-item" onclick="selectSetupAvatar(this, '🤖')" data-emoji="🤖">🤖</div>
+                        <div class="avatar-setup-item" onclick="selectSetupAvatar(this, '🧙')" data-emoji="🧙">🧙</div>
+                    </div>
+                </div>
+                
+                <div class="setup-input-group">
+                    <label class="setup-label">Select Country</label>
+                    <select id="setup-country-select" class="setup-input-field">
+                        <option value="India">🇮🇳 India</option>
+                        <option value="United States">🇺🇸 United States</option>
+                        <option value="United Kingdom">🇬🇧 United Kingdom</option>
+                        <option value="Russia">🇷🇺 Russia</option>
+                        <option value="France">🇫🇷 France</option>
+                        <option value="Canada">🇨🇦 Canada</option>
+                        <option value="Germany">🇩🇪 Germany</option>
+                    </select>
+                </div>
+                
+                <div class="setup-input-group" style="text-align: center; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; border: 1px dashed var(--border-color); margin-bottom: 24px;">
+                    <div style="font-size: 10px; color: var(--text-muted); letter-spacing: 1px;">PUBLIC PLAYER ID</div>
+                    <div id="setup-generated-uid" style="font-family: var(--font-mono); font-weight: 800; font-size: 16px; color: var(--gold); margin-top: 4px;">FUTX000000</div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="submitUserProfile()" style="background: linear-gradient(135deg, var(--gold-dark), var(--gold)); color: #000; border: none; padding: 14px; font-weight: 800; font-size: 13px; border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;">
+                    CONTINUE TO LOBBY
+                </button>
+            </div>
+        </main>
+
+        <!-- 4️⃣ Home Lobby -->
+        <main id="lobby" class="hidden-screen">
+            <!-- HUD top strip -->
+            <header class="lobby-hud-top">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <!-- Hamburger Menu Button -->
+                    <button id="hamburger-btn" onclick="openSlideDrawer()" style="background: transparent; border: none; color: #fff; font-size: 20px; cursor: pointer; padding: 4px; display: flex; align-items: center;">
+                        ☰
+                    </button>
+                    <!-- Small profile badge with stats -->
+                    <div class="lobby-hud-profile" onclick="openProfilePanel()">
+                        <div class="lobby-hud-avatar-frame" id="hud-avatar-frame-box" style="border-radius: 50%;">
+                            <span id="hud-avatar-emoji">♟️</span>
+                        </div>
+                        <div class="lobby-hud-stats">
+                            <div class="lobby-hud-username" id="hud-username-display">GUEST_PLAYER
+                                <span class="lobby-hud-level xp-hold-trigger" id="hud-level-display" data-xp-reveal>LVL 5</span>
+                                <span class="xp-hold-tooltip hidden-info" id="hud-xp-tooltip">50 / 200 XP</span>
+                            </div>
+                            <div class="lobby-hud-rank" id="hud-rank-name">Pawn I</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Currency tracker & controls -->
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class="lobby-hud-wallet">
+                        <div class="hud-wallet-item hud-wallet-coins" onclick="openStorePanel()" title="Coins Balance">
+                            🪙 <span id="hud-wallet-coins-val">100</span>
+                        </div>
+                        <div class="hud-wallet-item hud-wallet-gems" onclick="openStorePanel()" title="Gems Balance">
+                            💎 <span id="hud-wallet-gems-val">0</span>
+                        </div>
+                    </div>
+                    <!-- Settings -->
+                    <button onclick="openSettingsPanel()" style="background: transparent; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer; padding: 4px;">
+                        ⚙️
+                    </button>
+                </div>
+            </header>
+
+            <!-- Central Rank Progress Display -->
+            <div class="lobby-rank-center" onclick="openRankJourneyPanel()">
+                <div id="lobby-rank-badge-wrap" class="lobby-rank-badge-wrap"></div>
+                <div class="lobby-rank-info">
+                    <div class="lobby-rank-title" id="lobby-rank-label">PAWN I</div>
+                    <div class="lobby-rank-rp" id="lobby-rank-rp-text">0 / 50 RP</div>
+                    <div class="lobby-rank-progress-track">
+                        <div class="lobby-rank-progress-fill" id="lobby-rank-progress-bar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid Center: Large Game cards -->
+            <div class="lobby-grid-center">
+                <!-- Play Online — Casual Unranked -->
+                <div class="gaming-card gaming-card-main gaming-card-play-online" onclick="openPlayOnlineMenu()">
+                    <span class="gaming-card-icon">🌍</span>
+                    <h3 class="gaming-card-title" style="color: var(--blue-accent);">PLAY ONLINE</h3>
+                    <p class="gaming-card-desc">Friendly worldwide duels with move assists enabled. No RP at stake — train and have fun.</p>
+                </div>
+
+                <!-- Ranked Ladder Match (Competitive) -->
+                <div class="gaming-card gaming-card-main gaming-card-ranked" onclick="openRankedMatchMenu()">
+                    <span class="gaming-card-icon">🏆</span>
+                    <h3 class="gaming-card-title" style="color: var(--gold);">RANKED CHESS</h3>
+                    <p class="gaming-card-desc">Competitive Elo/RP matchmaking. No move assists. Adaptive bot fallback after 10–12s.</p>
+                </div>
+                
+                <!-- VS Computer -->
+                <div class="gaming-card" onclick="openVSComputerMenu()">
+                    <span class="gaming-card-icon">🤖</span>
+                    <h3 class="gaming-card-title">VS COMPUTER</h3>
+                    <p class="gaming-card-desc">Challenge the built-in minimax robot with modular difficulty settings.</p>
+                </div>
+
+                <!-- Create Private Room -->
+                <div class="gaming-card" onclick="openPrivateRoomMenu()">
+                    <span class="gaming-card-icon">🤝</span>
+                    <h3 class="gaming-card-title">PRIVATE ROOM</h3>
+                    <p class="gaming-card-desc">Host game rooms, share exclusive custom invite code with your friends.</p>
+                </div>
+
+                <!-- Friends & Requests -->
+                <div class="gaming-card" onclick="openFriendsPanel()">
+                    <span class="gaming-card-icon">👥</span>
+                    <h3 class="gaming-card-title">FRIENDS</h3>
+                    <p class="gaming-card-desc">Social circle overview, accept friend matches and review online lists.</p>
+                </div>
+
+                <!-- Customizations Store -->
+                <div class="gaming-card" onclick="openStorePanel()">
+                    <span class="gaming-card-icon">🛍️</span>
+                    <h3 class="gaming-card-title">THE STORE</h3>
+                    <p class="gaming-card-desc">Equip custom titles, profile avatar frames, distinct symbols & chess skin sets.</p>
+                </div>
+
+                <!-- Achievements -->
+                <div class="gaming-card" onclick="openAchievementsPanel()">
+                    <span class="gaming-card-icon">🏅</span>
+                    <h3 class="gaming-card-title">ACHIEVEMENTS</h3>
+                    <p class="gaming-card-desc">Claim historical milestones and career targets to earned golden rewards.</p>
+                </div>
+
+                <!-- Daily Rewards -->
+                <div class="gaming-card" onclick="openDailyRewardsClaimPanel()" style="border-color: rgba(33, 150, 243, 0.2);">
+                    <span class="gaming-card-icon">📅</span>
+                    <h3 class="gaming-card-title" style="color: #64b5f6;">DAILY GIFT</h3>
+                    <p class="gaming-card-desc">Claim your daily coins, avatar, frames and special items rewards cycle.</p>
+                </div>
+            </div>
+
+            <footer class="lobby-footer-nav">
+                <button class="lobby-nav-btn" onclick="openFriendsPanel()"><span>👥</span>FRIENDS</button>
+                <button class="lobby-nav-btn" onclick="openStorePanel()"><span>🛍️</span>STORE</button>
+                <button class="lobby-nav-btn" onclick="openAchievementsPanel()"><span>🏅</span>ACHIEVEMENTS</button>
+                <button class="lobby-nav-btn lobby-nav-gift" onclick="openDailyRewardsClaimPanel()"><span>📅</span>DAILY GIFT</button>
+            </footer>
+            <footer class="lobby-footer" style="padding: 6px 10px; background: rgba(0,0,0,0.6); border-top: 1px solid rgba(255,255,255,0.03);">
+                <div class="connection-status">
+                    <span class="status-indicator" id="status-dot"></span>
+                    <span id="status-text">CONNECTING TO LOBBY SERVER...</span>
+                </div>
+            </footer>
+        </main>
+
+        <!-- 5️⃣ Left Slide Menu (Hamburger Sidebar) -->
+        <div class="drawer-overlay" id="drawer-overlay-box" onclick="closeSlideDrawer()"></div>
+        <aside id="left-slide-drawer">
+            <div class="drawer-header">
+                <div style="font-size: 10px; color: var(--gold); letter-spacing: 2px; font-weight: 800;">FUTECX GENERAL</div>
+                <h3 style="font-family: var(--font-display); font-size: 16px; color: #fff; margin-top: 2px;">NAVIGATION</h3>
+            </div>
+            <nav style="display: flex; flex-direction: column;">
+                <div class="drawer-item" onclick="closeSlideDrawer(); openProfilePanel();">👤 Profile Stats</div>
+                <div class="drawer-item" onclick="closeSlideDrawer(); openRankJourneyPanel();">🗺️ Rank Journey</div>
+                <div class="drawer-item" onclick="closeSlideDrawer(); openMatchHistoryPanel();">📜 Match History</div>
+                <div class="drawer-item" onclick="closeSlideDrawer(); openAchievementsPanel();">🏅 Achievements</div>
+                <div class="drawer-item" onclick="closeSlideDrawer(); openFriendsPanel();">👥 Friends System</div>
+                <div class="drawer-item" onclick="closeSlideDrawer(); openStorePanel();">🛍️ Customize Store</div>
+                <div class="drawer-item" onclick="closeSlideDrawer(); openSettingsPanel();">⚙️ Game Settings</div>
+                <div style="height: 1px; background: rgba(255,255,255,0.05); margin: 12px 16px;"></div>
+                <div class="drawer-item" onclick="FtechSystem.logout()" style="color: #ff3333;">🚪 Logout Session</div>
+            </nav>
+        </aside>
+
+        <!-- Main Game Screen — FUTECX V2 Production Layout -->
+        <main id="game-screen" class="hidden-screen">
+            <div id="game-play-layout">
+
+                <!-- TOP: Opponent Card -->
+                <header id="game-top-zone" class="game-zone game-zone-top">
+                    <div class="match-player-card match-card-opponent" id="hud-top">
+                        <div class="match-card-main">
+                            <div class="match-avatar-wrap" id="opponent-avatar-frame">
+                                <span class="match-avatar-emoji" id="opponent-avatar">♚</span>
+                                <span class="match-online-dot" id="opponent-online-dot"></span>
+                            </div>
+                            <div class="match-card-info">
+                                <div class="match-card-name-row">
+                                    <span class="player-name" id="opponent-name">Opponent</span>
+                                    <button id="opponent-add-friend-btn" class="match-add-friend-btn hidden-info" onclick="sendMidMatchFriendRequest()" title="Add Friend">➕</button>
+                                </div>
+                                <span class="player-rank-badge" id="opponent-rank-badge">Pawn I</span>
+                                <span class="player-status-badge" id="opponent-status">WAITING...</span>
+                                <div id="opponent-chat-bubble" class="profile-chat-bubble hidden-bubble"></div>
+                            </div>
+                            <div class="match-timer-block" id="timer-opponent-wrap">
+                                <div class="timer-tag" id="timer-opponent-label">OPP</div>
+                                <div id="timer-val-opponent" class="timer-value">10:00</div>
+                            </div>
+                        </div>
+                        <div class="captured-tray captured-tray-opponent" id="opponent-captured-tray" title="Pieces captured by opponent"></div>
+                    </div>
+                </header>
+
+                <!-- CENTER: 3D Board (absolute center lock) -->
+                <section id="canvas-container" class="game-board-zone">
+                    <div id="board-render-host"></div>
+
+                    <div id="connection-recovery-overlay" class="connection-recovery-overlay hidden-banner">
+                        <div class="recovery-spinner"></div>
+                        <span id="connection-recovery-text">Reconnecting...</span>
+                    </div>
+
+                    <div id="network-status-banner" class="network-status-banner hidden-banner">
+                        <span class="network-icon">⚠️</span>
+                        <span id="network-status-text">POOR CONNECTION DETECTED</span>
+                    </div>
+
+                    <div id="your-turn-overlay" class="turn-overlay-container">
+                        <div class="turn-overlay-content">
+                            <div class="turn-overlay-title">YOUR TURN</div>
+                            <div class="turn-overlay-subtitle">MAKE YOUR MOVE</div>
+                        </div>
+                    </div>
+
+                    <div class="viewport-hud">
+                        <div id="game-status-label">WHITE'S TURN</div>
+                        <div class="viewport-hud-actions" style="align-items: center;">
+                            <button class="viewport-btn coach-btn hidden-info" id="coach-ideas-btn" onclick="openCoachHintStore()" style="height:auto; min-height:48px; padding:6px 10px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;" title="AI Coach Hints">💡 Coach Hint</button>
+                            <button class="viewport-btn" id="game-chat-toggle-btn" onclick="toggleGameChatPanel()" style="height:32px;" title="Chat">💬</button>
+                            <button class="viewport-btn" onclick="resetCameraAngle()" style="height:32px;" title="Reset View">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 12a11 11 0 1 1-11-11c3.1 0 5.9 1.3 7.9 3.4L20 4.5"/><path d="M19.9 1V4.5H16.4"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="coach-result-panel" class="coach-result-panel hidden-panel">
+                        <div class="coach-result-title">💡 Coach Hint</div>
+                        <div id="coach-best-move" class="coach-best-move">—</div>
+                        <div id="coach-reason" class="coach-reason">—</div>
+                        <div id="coach-advantage" class="coach-advantage">—</div>
+                        <button class="coach-dismiss-btn" onclick="dismissCoachPanel(true)">✖</button>
+                    </div>
+
+                    <div id="game-chat-panel" class="game-chat-panel hidden-panel">
+                        <div class="game-chat-tabs">
+                            <button class="game-chat-tab active" id="chat-tab-phrases" onclick="setGameChatTab('phrases')">Quick Chat</button>
+                            <button class="game-chat-tab" id="chat-tab-emojis" onclick="setGameChatTab('emojis')">Emojis</button>
+                            <button class="game-chat-close" onclick="toggleGameChatPanel()">✖</button>
+                        </div>
+                        <div id="game-chat-phrases" class="game-chat-body"></div>
+                        <div id="game-chat-emojis" class="game-chat-body hidden-panel"></div>
+                    </div>
+
+                    <!-- Compact match controls (mobile-friendly) -->
+                    <div class="game-float-actions">
+                        <div class="room-info-display hidden-info" id="room-code-display-box">
+                            <span class="room-info-tag">ROOM</span>
+                            <span class="room-code-value" id="game-room-code" onclick="copyRoomCode()">------</span>
+                        </div>
+                        <button class="game-float-btn" onclick="toggleSideView()">↻<span class="float-btn-label">Rotate</span></button>
+                        <button class="game-float-btn game-float-resign" onclick="resignGame()">🏳<span class="float-btn-label">Resign</span></button>
+                        <button class="game-float-btn" onclick="returnToLobby()">✕<span class="float-btn-label">Leave</span></button>
+
+                        <!-- Collapsed match menu for ultra-narrow screens (<280px) -->
+                        <button class="match-menu-collapsed" onclick="toggleMatchMenu(event)" aria-label="Match Menu">
+                            ☰
+                            <span class="menu-trigger-label">Menu</span>
+                        </button>
+                        <div class="match-menu-dropdown" id="match-menu-dropdown">
+                            <button class="match-menu-item" onclick="toggleSideView(); closeMatchMenu();">↻ Rotate Board</button>
+                            <button class="match-menu-item menu-item-resign" onclick="resignGame(); closeMatchMenu();">🏳 Resign</button>
+                            <button class="match-menu-item" onclick="returnToLobby(); closeMatchMenu();">✕ Leave Match</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- BOTTOM: Player Card -->
+                <footer id="game-bottom-zone" class="game-zone game-zone-bottom">
+                    <div class="captured-tray captured-tray-player" id="player-captured-tray" title="Your captures"></div>
+                    <div class="match-player-card match-card-player" id="hud-bottom">
+                        <div class="match-card-main">
+                            <div class="match-avatar-wrap match-avatar-self" id="player-avatar-frame">
+                                <span class="match-avatar-emoji" id="player-avatar">♔</span>
+                            </div>
+                            <div class="match-card-info">
+                                <span class="player-name" id="player-name">Player</span>
+                                <span class="player-rank-badge" id="player-rank-badge">Pawn I</span>
+                                <span class="player-status-badge" id="player-status">LOCAL DUEL</span>
+                                <div id="player-chat-bubble" class="profile-chat-bubble hidden-bubble"></div>
+                            </div>
+                            <div class="match-timer-block active-timer" id="timer-player-wrap">
+                                <div class="timer-tag" id="timer-player-label">YOU</div>
+                                <div id="timer-val-player" class="timer-value">10:00</div>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+
+                <!-- Hidden timer refs for engine compatibility -->
+                <span id="timer-val-white" class="hidden-info">10:00</span>
+                <span id="timer-val-black" class="hidden-info">10:00</span>
+                <span id="timer-white" class="hidden-info"></span>
+                <span id="timer-black" class="hidden-info"></span>
+
+                <!-- BOTTOM NAV -->
+                <nav id="game-bottom-nav" class="game-bottom-nav">
+                    <button class="game-nav-btn" onclick="returnToLobby()"><span>🏠</span>Home</button>
+                    <button class="game-nav-btn" onclick="returnToLobby(); setTimeout(openPlayOnlineMenu,300)"><span>⚔️</span>Play</button>
+                    <button class="game-nav-btn" onclick="returnToLobby(); setTimeout(openStorePanel,300)"><span>🛍️</span>Store</button>
+                    <button class="game-nav-btn" onclick="returnToLobby(); setTimeout(openFriendsPanel,300)"><span>👥</span>Friends</button>
+                    <button class="game-nav-btn" onclick="returnToLobby(); setTimeout(openProfilePanel,300)"><span>👤</span>Profile</button>
+                </nav>
+            </div>
+
+            <!-- Match Intro Cinematic -->
+            <div id="match-intro-overlay" class="match-intro-overlay hidden-modal">
+                <div class="match-intro-flash"></div>
+                <div class="match-intro-label">PLAYER VS PLAYER</div>
+                <div class="match-intro-duel">
+                    <div class="match-intro-player">
+                        <div class="match-intro-avatar-frame" id="intro-player-frame">
+                            <span id="intro-player-avatar">♔</span>
+                        </div>
+                        <div class="match-intro-name" id="intro-player-name">YOU</div>
+                    </div>
+                    <div class="match-intro-vs">VS</div>
+                    <div class="match-intro-player">
+                        <div class="match-intro-avatar-frame" id="intro-opponent-frame">
+                            <span id="intro-opponent-avatar">♚</span>
+                        </div>
+                        <div class="match-intro-name" id="intro-opponent-name">OPPONENT</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Move log drawer (desktop) -->
+            <aside id="game-sidebar" class="hidden-info">
+                <div class="moves-container">
+                    <div class="moves-title">MATCH LOG</div>
+                    <div id="moves-list" class="moves-list">
+                        <div class="empty-moves-placeholder">Awaiting first move...</div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Promotion Dialog (Black & White sleek layout) -->
+        <div id="promotion-dialog" class="modal-overlay hidden-modal">
+            <div class="modal-card">
+                <h3>PAWN PROMOTION</h3>
+                <p>Choose a composition to recruit</p>
+                <div class="promotion-choices">
+                    <button class="promo-btn" onclick="selectPromotionPiece('Q')">
+                        <span class="promo-piece-symbol">♛</span>
+                        <span class="promo-piece-label">QUEEN</span>
+                    </button>
+                    <button class="promo-btn" onclick="selectPromotionPiece('R')">
+                        <span class="promo-piece-symbol">♜</span>
+                        <span class="promo-piece-label">ROOK</span>
+                    </button>
+                    <button class="promo-btn" onclick="selectPromotionPiece('B')">
+                        <span class="promo-piece-symbol">♝</span>
+                        <span class="promo-piece-label">BISHOP</span>
+                    </button>
+                    <button class="promo-btn" onclick="selectPromotionPiece('N')">
+                        <span class="promo-piece-symbol">♞</span>
+                        <span class="promo-piece-label">KNIGHT</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Notification System Container -->
+        <div id="notification-container" class="ftech-toast-container"></div>
+
+        <!-- Permissions Instructive Overlay -->
+        <div id="permissions-overlay" class="modal-overlay hidden-modal" style="background-color: rgba(5, 5, 5, 0.95); backdrop-filter: blur(4px);">
+            <div class="modal-card" style="max-width: 420px; text-align: left; padding: 24px;">
+                <span class="result-badge" style="background-color: #ff3333; color: white; border-color: rgba(255, 51, 51, 0.5);">FIRESTORE ERROR</span>
+                <h2 style="font-family: var(--font-fancy); color: white; font-size: 18px; font-weight: 800; margin-top: 8px; margin-bottom: 12px; letter-spacing: 0.5px;">RESOLVE FIRESTORE SECURITY RULES</h2>
+                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px;">
+                    Your Firebase Firestore Database is rejecting connections due to missing or insufficient permissions. To enable seamless online rooms, set the rules in console:
+                </p>
+                <ol style="font-size: 13px; color: var(--text-light); line-height: 1.6; margin-bottom: 14px; padding-left: 20px;">
+                    <li>Open <strong style="color: #4bacf5;">Firebase Console</strong></li>
+                    <li>Click <strong style="color: white;">Firestore Database</strong></li>
+                    <li>Select the <strong style="color: #ffca28;">Rules</strong> tab</li>
+                    <li>Replace code with rules block:</li>
+                </ol>
+                <pre style="background: rgba(255,255,255,0.06); padding: 10px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: #4af626; overflow-x: auto; margin-bottom: 18px; border: 1px solid rgba(255,255,255,0.12); line-height: 1.3;">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /rooms/{room} {
+      allow read, write: if true;
+    }
+  }
+}</pre>
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn" style="flex: 1;" onclick="closePermissionsOverlay()">GOT IT</button>
+                    <button class="btn btn-outline" style="flex:1;" onclick="window.open('https://console.firebase.google.com/', '_blank')">OPEN CONSOLE</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Match Result Overlay -->
+        <div id="result-overlay" class="modal-overlay hidden-modal">
+            <div class="modal-card result-card">
+                <span class="result-badge">MATCH TERMINATED</span>
+                <h2 id="result-title">CHECKMATE</h2>
+                <p id="result-desc">WHITE SECURES VICTORY</p>
+                <button class="btn btn-outline" onclick="returnToLobby()">RETURN TO LOBBY</button>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             FUTECX CHESS V3 MODALS COMPONENT REGISTRY
+             ========================================== -->
+
+        <!-- 1. VS Computer Modal -->
+        <div id="vs-computer-modal" class="modal-overlay hidden-modal">
+            <div class="profile-card" style="max-width: 440px; height: auto; max-height: 90vh;">
+                <button class="modal-close-btn" onclick="closeVSComputerMenu()">✖</button>
+                <div class="profile-gold-banner">
+                    <span style="font-size: 32px">🤖</span>
+                    <div style="text-align: left;">
+                        <h3 style="font-family: var(--font-display); font-size: 14px; color: #fff; letter-spacing: 1px;">CHALLENGE ROBOT</h3>
+                        <p style="font-size: 10px; color: var(--gold); letter-spacing: 0.5px;">SELECT PREFERRED DIFFICULTY & PIECE COLOR</p>
+                    </div>
+                </div>
+                <div style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+                    <div>
+                        <label class="setup-label">Select Difficulty</label>
+                        <select id="v3-computer-diff" class="setup-input-field">
+                            <option value="easy">🤖 Easy (Depth 1 - Casual)</option>
+                            <option value="medium">⚔️ Medium (Depth 2 - Skilled)</option>
+                            <option value="hard">🔥 Hard (Depth 2+ - Tactician)</option>
+                            <option value="master">👑 Master (Depth 3 - Elite)</option>
+                            <option value="grandmaster">🏆 Grandmaster (Depth 4 - Absolute Legend)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="setup-label">Choose Side Color</label>
+                        <div class="robot-color-select-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <button id="color-select-white" class="btn btn-primary" onclick="setSelectColor('w')" style="padding: 10px; font-weight: 800;">WHITE PIECES</button>
+                            <button id="color-select-black" class="btn btn-outline" onclick="setSelectColor('b')" style="padding: 10px; font-weight: 800; border-color: #333; color: #888;">BLACK PIECES</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="startV3ComputerMatch()" style="background: linear-gradient(135deg, var(--gold-dark), var(--gold)); color: #000; padding:14px; font-weight:800; letter-spacing:1px; border:none; border-radius:6px; margin-top: 10px;">
+                        LAUNCH DUEL
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Create Private Room Modal -->
+        <div id="private-room-modal" class="modal-overlay hidden-modal">
+            <div class="profile-card" style="max-width: 440px; height: auto; max-height: 90vh;">
+                <button class="modal-close-btn" onclick="closePrivateRoomMenu()">✖</button>
+                <div class="profile-gold-banner" style="background: linear-gradient(90deg, #091a27 0%, #153852 100%); border-bottom-color: var(--blue-accent);">
+                    <span style="font-size: 32px">🤝</span>
+                    <div style="text-align: left;">
+                        <h3 style="font-family: var(--font-display); font-size: 14px; color: #fff; letter-spacing:1px;">PRIVATE MATCH ROOM</h3>
+                        <p style="font-size: 10px; color: var(--blue-accent); letter-spacing: 0.5px;">CUSTOMIZE RULES & INVITE CO-CONSPIRATORS</p>
+                    </div>
+                </div>
+                <div style="padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+                    <div>
+                        <label class="setup-label">Entry Fee Tier (Prize Pool)</label>
+                        <select id="v3-room-entry-fee" class="setup-input-field">
+                            <option value="none">🆓 Free Play (No Entry Fee)</option>
+                            <option value="standard">🪙 Standard — 50 Coins Entry / 80 Winner</option>
+                            <option value="premium">🪙 Premium — 200 Coins Entry / 350 Winner</option>
+                            <option value="tournament">🪙 Tournament — 500 Coins Entry / 900 Winner</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="setup-label">Match Ruleset</label>
+                        <select id="v3-room-mode" class="setup-input-field">
+                            <option value="classic">🛡️ Classic Match (Move assists ON)</option>
+                            <option value="ranked">🏆 Ranked Match (No move assists)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="setup-label">Clock Timer Limits</label>
+                        <select id="v3-room-timer" class="setup-input-field">
+                            <option value="10">⏳ 10 Minutes per side</option>
+                            <option value="20">⌛ 20 Minutes per side</option>
+                            <option value="30">⏰ 30 Minutes per side</option>
+                        </select>
+                    </div>
+
+                    <!-- Actions block -->
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                        <button class="btn btn-primary" onclick="createV3RoomGame()" style="background: linear-gradient(135deg, #1e88e5, #0d47a1); color: #fff; border:none; padding:14px; font-weight:800; border-radius:6px;">
+                            GENERATE LOBBY KEY
+                        </button>
+                        <div class="join-room-box" style="margin-top: 4px; display:flex; gap:6px;">
+                            <input type="text" id="v3-join-input" placeholder="ENTER 6-DIGIT CODE" maxlength="6" style="background:#050505; border:1px solid var(--border-color); color:#fff; padding:10px; font-family:var(--font-mono); font-size:11px; border-radius:4px; outline:none; text-transform:uppercase; flex:1;">
+                            <button class="btn btn-outline" onclick="joinV3RoomGame()" style="padding:0 20px; font-size:11px; border-radius:4px; border-color: rgba(255,255,255,0.15)">JOIN</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2B. Private Room Waiting/Invitation Modal -->
+        <div id="private-room-waiting-modal" class="modal-overlay hidden-modal">
+            <div class="profile-card" style="max-width: 440px; height: auto; max-height: 90vh; text-align: center;">
+                <button class="modal-close-btn" onclick="cancelPrivateRoomWaiting()">✖</button>
+                <div class="profile-gold-banner" style="background: linear-gradient(135deg, #091a27 0%, #153852 100%); border-bottom-color: var(--gold); border-bottom-width: 2px; border-bottom-style: solid; display: flex; align-items: center; gap: 14px; padding: 18px 24px;">
+                    <span style="font-size: 32px">🏰</span>
+                    <div style="text-align: left;">
+                        <h3 style="font-family: var(--font-display); font-size: 14px; color: #fff; letter-spacing:1px; margin: 0;">DUEL WAITING ROOM</h3>
+                        <p style="font-size: 10px; color: var(--gold); letter-spacing: 0.5px; margin: 2px 0 0 0;">PROVISIONED OK • AWAITING CHALLENGER</p>
+                    </div>
+                </div>
+                <div style="padding: 24px; display: flex; flex-direction: column; gap: 20px; align-items: center;">
+                    
+                    <!-- Pulsing Radar / Loading indicator -->
+                    <div class="lobby-waiting-radar" style="position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; margin: 10px 0;">
+                        <div class="radar-pulse-ring" style="position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 2.5px solid var(--gold); opacity: 0.3; animation: radarPulse 1.8s infinite ease-out;"></div>
+                        <div class="radar-pulse-ring" style="position: absolute; width: 70%; height: 70%; border-radius: 50%; border: 2px solid #5c6bc0; opacity: 0.4; animation: radarPulse 1.8s infinite ease-out 0.6s;"></div>
+                        <span style="font-size: 28px; z-index: 2;">⚔️</span>
+                    </div>
+
+                    <!-- Room Code Display -->
+                    <div style="width: 100%;">
+                        <p style="font-size: 10px; letter-spacing: 2px; color: var(--text-muted); font-weight: 800; text-transform: uppercase; margin: 0 0 8px 0;">YOUR EXCLUSIVE ROOM CODE</p>
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <div id="v3-waiting-room-code" onclick="copyWaitingRoomCode()" style="font-family: var(--font-mono); font-size: 32px; font-weight: 900; letter-spacing: 6px; color: #fff; background: rgba(0,0,0,0.4); padding: 10px 24px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.08); text-shadow: 0 0 10px rgba(223, 183, 108, 0.3); cursor: pointer;">
+                                ------
+                            </div>
+                        </div>
+                        <p style="font-size: 10px; color: var(--text-muted); margin: 8px 0 0 0;">Tap code below or share with your friends to play!</p>
+                    </div>
+
+                    <!-- Direct Invite Friend Row -->
+                    <div style="width: 100%; display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+                        <!-- Invite Friend via App Share (WhatsApp, systems, etc.) -->
+                        <button class="btn btn-primary" onclick="inviteFriendShareAction()" style="background: linear-gradient(135deg, var(--gold), #ffca28); color: #000; font-weight: 800; border: none; padding: 14px; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; text-shadow: none; border-color: transparent;">
+                            💬 INVITE FRIEND / SHARE CODE
+                        </button>
+                        
+                        <!-- Secondary Copy Button -->
+                        <button class="btn btn-outline" onclick="copyWaitingRoomCode()" style="padding: 12px; font-size: 11px; border-radius: 6px; border-color: rgba(255,255,255,0.12); color: #fff; background: transparent; width: 100%; cursor: pointer;">
+                            📋 COPY ROOM CODE
+                        </button>
+                    </div>
+
+                    <!-- Invite Friends Panel (In-Game Contacts) -->
+                    <div id="waiting-room-friends-panel" style="width:100%; text-align:left; margin-top:8px;">
+                        <label class="setup-label" style="margin-bottom:8px;">INVITE FRIENDS</label>
+                        <div id="waiting-room-friends-list" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;"></div>
+                    </div>
+
+                    <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.02); padding: 8px 16px; border-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.03);">
+                        <div class="glow-dot" style="width: 8px; height: 8px; background-color: #ff9100; border-radius: 50%; box-shadow: 0 0 8px #ff9100; animation: blinkGlow 1.2s infinite ease-in-out;"></div>
+                        <span style="font-size: 10px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">ESTABLISHING LOBBY QUEUE...</span>
+                    </div>
+
+                    <button class="btn btn-dark-outline" onclick="cancelPrivateRoomWaiting()" style="margin-top: 10px; border-color: rgba(255, 51, 51, 0.2); color: #ff5252; padding: 10px 24px; font-size: 10px; border-radius: 4px; cursor: pointer; background: transparent;">
+                        CANCEL MATCH ROOM
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Friends List / System Modal -->
+        <div id="friends-modal" class="modal-overlay hidden-modal">
+            <div class="profile-card" style="max-width: 460px;">
+                <button class="modal-close-btn" onclick="closeFriendsPanel()">✖</button>
+                <div class="profile-gold-banner" style="background: linear-gradient(90deg, #10101a 0%, #1e1e35 100%);">
+                    <span style="font-size: 32px">👥</span>
+                    <div style="text-align: left;">
+                        <h3 style="font-family: var(--font-display); font-size: 14px; color: #fff; letter-spacing:1px;">FRIENDS SYSTEM</h3>
+                        <p style="font-size: 10px; color: var(--text-muted); letter-spacing:0.5px;">ONLINE ROSTER, SYSTEM REQUESTS & RECENTS</p>
+                    </div>
+                </div>
+                
+                <!-- Tab headers -->
+                <div id="friends-tabs" style="display: flex; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border-color); padding: 4px; gap: 4px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;"><button class="btn active-tab" id="friends-tab-btn-online" onclick="setFriendsSubTab('online')" style="flex: 0 0 auto; scroll-snap-align: start; padding: 10px 16px; border: none; font-size: 11px; color:#fff;">FRIENDS</button><button class="btn" id="friends-tab-btn-requests" onclick="setFriendsSubTab('requests')" style="flex: 0 0 auto; scroll-snap-align: start; padding: 10px 16px; border: none; font-size: 11px; color: var(--text-muted);">REQUESTS</button><button class="btn" id="friends-tab-btn-search" onclick="setFriendsSubTab('search')" style="flex: 0 0 auto; scroll-snap-align: start; padding: 10px 16px; border: none; font-size: 11px; color: var(--text-muted);">SEARCH</button><button class="btn" id="friends-tab-btn-recents" onclick="setFriendsSubTab('recents')" style="flex: 0 0 auto; scroll-snap-align: start; padding: 10px 16px; border: none; font-size: 11px; color: var(--text-muted);">RECENTS</button><button class="btn" id="friends-tab-btn-blocked" onclick="setFriendsSubTab('blocked')" style="flex: 0 0 auto; scroll-snap-align: start; padding: 10px 16px; border: none; font-size: 11px; color: var(--text-muted);">BLOCKED</button></div>
+                
+                <!-- Tab body content with input -->
+                <div style="padding: 16px; flex: 1; display:flex; flex-direction:column; overflow:hidden;">
+                    <!-- Friend invite field -->
+                    <div style="display:flex; gap:8px; margin-bottom: 12px; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+                        <input type="text" id="add-friend-v3-input" placeholder="Enter gamer tag..." style="flex:1; background:transparent; border:none; outline:none; color:#fff; font-family:var(--font-mono); font-size:12px; font-weight:700;">
+                        <button class="btn btn-primary" onclick="sendV3FriendRequest()" style="width:auto; padding: 6px 14px; font-size: 10px; border-radius: 4px;">SEND</button>
+                    </div>
+
+                    <!-- Scrollable list -->
+                    <div id="friends-list-scroller" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                        <div class="skeleton-item"></div>
+                        <div class="skeleton-item"></div>
+                        <div class="skeleton-item"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Customize Store Modal -->
+        <div id="store-modal" class="modal-overlay hidden-modal">
+            <div class="profile-card" style="max-width: 500px;">
+                <button class="modal-close-btn" onclick="closeStorePanel()">✖</button>
+                <div class="profile-gold-banner">
+                    <span style="font-size: 32px">🛍️</span>
+                    <div style="text-align: left;">
+                        <h3 style="font-family: var(--font-display); font-size: 14px; color: #fff; letter-spacing: 1px;">THE STORE</h3>
+                        <p style="font-size: 10px; color: var(--gold); letter-spacing: 0.5px;">ACCESSORIES, CHROMAS & EXTACT SKIN SETS</p>
+                    </div>
+                </div>
+                
+                <!-- Category Headers -->
+                <div id="store-tabs-container" style="display: flex; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border-color); padding: 4px; gap: 2px; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;">
+                    <button class="btn active-tab" id="store-cat-btn-avatars" onclick="setStoreCategory('avatars')" style="padding: 10px 14px; border: none; font-size: 10px; color:#fff; white-space: nowrap;">AVATARS</button>
+                    <button class="btn" id="store-cat-btn-frames" onclick="setStoreCategory('frames')" style="padding: 10px 14px; border: none; font-size: 10px; color: var(--text-muted); white-space: nowrap;">FRAMES</button>
+                    <button class="btn" id="store-cat-btn-titles" onclick="setStoreCategory('titles')" style="padding: 10px 14px; border: none; font-size: 10px; color: var(--text-muted); white-space: nowrap;">TITLES</button>
+                    <button class="btn" id="store-cat-btn-themes" onclick="setStoreCategory('themes')" style="padding: 10px 14px; border: none; font-size: 10px; color: var(--text-muted); white-space: nowrap;">THEMES</button>
+                    <button class="btn" id="store-cat-btn-skins" onclick="setStoreCategory('skins')" style="padding: 10px 14px; border: none; font-size: 10px; color: var(--text-muted); white-space: nowrap;">PIECE SKINS</button>
+                    <button class="btn" id="store-cat-btn-boards" onclick="setStoreCategory('boards')" style="padding: 10px 14px; border: none; font-size: 10px; color: var(--text-muted); white-space: nowrap;">BOARD SKINS</button>
+                    <button class="btn" id="store-cat-btn-sounds" onclick="setStoreCategory('sounds')" style="padding: 10px 14px; border: none; font-size: 10px; color: var(--text-muted); white-space: nowrap;">SOUND PACKS</button>
+                    <button class="btn" id="store-cat-btn-emotes" onclick="setStoreCategory('emotes')" style="padding: 10px 14px; border: none; font-size: 10px; color: var(--text-muted); white-space: nowrap;">EMOTES</button>
+                </div>
+                
+                <div id="store-items-scroller" style="flex: 1; overflow-y: auto; padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="skeleton-item" style="height: 100px;"></div>
+                    <div class="skeleton-item" style="height: 100px;"></div>
+                    <div class="skeleton-item" style="height: 100px;"></div>
+                    <div class="skeleton-item" style="height: 100px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Achievements / Milestones Modal -->
+        <div id="achievements-modal" class="modal-overlay hidden-modal">
+            <div class="profile-card" style="max-width: 480px;">
+                <button class="modal-close-btn" onclick="closeAchievementsPanel()">✖</button>
+                <div class="profile-gold-banner" style="background: linear-gradient(90deg, #13121b 0%, #2f2512 100%);">
+                    <span style="font-size: 32px">🏅</span>
+                    <div style="text-align: left;">
+                        <h3 style="font-family: var(--font-display); font-size: 14px; color: #fff; letter-spacing: 1px;">ACHIEVEMENTS</h3>
+                        <p style="font-size: 10px; color: var(--gold); letter-spacing: 0.5px;">CLAIM COINS BY COMPLETING TACTICAL MILESTONES</p>
+                    </div>
+                </div>
+                
+                <div id="achievements-list-scroller" style="flex:1; overflow-y:auto; padding: 16px; display:flex; flex-direction:column; gap:8px;">
+                    <div class="skeleton-item"></div>
+                    <div class="skeleton-item"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Daily Rewards Modal -->
+        <div id="daily-rewards-modal" class="modal-overlay hidden-modal">
+            <div class="profile-card" style="max-width: 440px; height: auto; max-height: 90vh;">
+                <button class="modal-close-btn" onclick="closeDailyRewardsClaimPanel()">✖</button>
+                <div class="profile-gold-banner" style="background: linear-gradient(90deg, #091722 0%, #15374e 100%);">
+                    <span style="font-size: 32px">📅</span>
+                    <div style="text-align: left;">
+                        <h3 style="font-family: var(--font-display); font-size: 14px; color: #fff; letter-spacing: 1px;">DAILY CALENDAR</h3>
+                        <p style="font-size: 10px; color: #4fc3f7; letter-spacing: 0.5px;">7-DAY SECURE SIGNIN CLAIM CHAIN</p>
+                    </div>
+                </div>
+                
+                <div style="padding: 20px;">
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; text-align: left;">Strengthen your streaks. Claims can be made once every 24 hours.</p>
+                    
+                    <div class="rewards-grid-seven" id="v3-daily-rewards-grid">
+                        <div class="skeleton-item" style="height: 95px;"></div>
+                        <div class="skeleton-item" style="height: 95px;"></div>
+                        <div class="skeleton-item" style="height: 95px;"></div>
+                        <div class="skeleton-item" style="height: 95px;"></div>
+                        <div class="skeleton-item" style="height: 95px;"></div>
+                        <div class="skeleton-item" style="height: 95px;"></div>
+                        <div class="skeleton-item" style="height: 95px; grid-column: span 2;"></div>
+                    </div>
+                    
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
+                        <span style="font-size:10px; color: var(--gold);">🛡️ SERVER SECURED ENGINE</span>
+                        <span style="font-size:9.5px; color: var(--text-muted);">Streak status fully validated</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. Profile & Collection Modal -->
+        <div id="profile-details-modal" class="modal-overlay hidden-modal">
+            <div class="profile-card" style="max-width: 500px;">
+                <button class="modal-close-btn" onclick="closeProfilePanel()">✖</button>
+                <div class="profile-gold-banner" id="p3-banner-bg">
+                    <div class="profile-avatar-outer" id="p3-avatar-frame-box">
+                        <span id="p3-avatar-emoji">♟️</span>
+                    </div>
+                    <div style="text-align: left;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <h2 style="font-family: var(--font-display); font-size:16px; font-weight:900; color:#fff;" id="p3-username">GRANDMASTER GUEST</h2>
+                            <span class="lobby-hud-level" id="p3-level">LVL 12</span>
+                        </div>
+                        <p style="font-size:10px; color:var(--gold); font-weight:800; text-transform:uppercase; letter-spacing:1px;" id="p3-title">NOVICE DUELIST</p>
+                        <div class="profile-id-row">
+                            <p class="profile-id-text" id="p3-uid-display">FUTX000000</p>
+                            <button class="profile-id-btn" onclick="copyPlayerId()" title="Copy Player ID">📋</button>
+                            <button class="profile-id-btn" onclick="sharePlayerId()" title="Share Player ID">🔗</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="padding: 16px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;">
+                    <!-- Rank Indicator with SVG custom badges -->
+                    <div style="background: rgba(0,0,0,0.5); border-radius: 8px; padding: 14px; border: 1px solid var(--border-color); display:flex; align-items:center; gap:16px;">
+                        <div id="p3-badge-svg-container">
+                            <!-- SVG generated dynamically -->
+                        </div>
+                        <div style="flex:1; text-align: left;">
+                            <div style="font-size:12px; font-weight:800; color:#fff;" id="p3-rank-class-name">Knight II</div>
+                            <div style="font-size: 10px; color: var(--gold);" id="p3-rp-desc">240 / 400 RP TO Bishop</div>
+                            
+                            <!-- Progression gauge -->
+                            <div style="width: 100%; height: 5px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-top: 6px; overflow:hidden;">
+                                <div id="p3-progress-gauge-bar" style="width: 60%; height:100%; background: linear-gradient(90deg, var(--gold), #ffca28); border-radius:10px;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Grid matches -->
+                    <div class="stat-metric-grid">
+                        <div class="stat-metric-box">
+                            <div class="stat-value" id="p3-stat-matches">0</div>
+                            <div class="stat-label">MATCHES</div>
+                        </div>
+                        <div class="stat-metric-box">
+                            <div class="stat-value" id="p3-stat-wins" style="color: #4af626;">0</div>
+                            <div class="stat-label">VICTORIES</div>
+                        </div>
+                        <div class="stat-metric-box">
+                            <div class="stat-value" id="p3-stat-losses" style="color: #ff3333;">0</div>
+                            <div class="stat-label">LOSSES</div>
+                        </div>
+                    </div>
+                    <div class="stat-metric-grid" style="margin-top: -6px;">
+                        <div class="stat-metric-box">
+                            <div class="stat-value" id="p3-stat-draws">0</div>
+                            <div class="stat-label">DRAWS</div>
+                        </div>
+                        <div class="stat-metric-box">
+                            <div class="stat-value" id="p3-stat-winrate" style="color: var(--blue-accent);">0%</div>
+                            <div class="stat-label">WIN RATE</div>
+                        </div>
+                        <div class="stat-metric-box">
+                            <div class="stat-value" id="p3-stat-shields" style="color: var(--gold);">1</div>
+                            <div class="stat-label">SHIELDS</div>
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <button class="btn btn-primary" onclick="closeProfilePanel(); openRankJourneyPanel();" style="font-size:10px; padding:10px 0;">🗺️ SEARCH JOURNEY</button>
+                        <button class="btn btn-outline" id="v3-toggle-collection-btn" onclick="openCollectionModal()" style="font-size:10px; padding:10px 0; border-color: rgba(255,255,255,0.15)">🎒 MY COLLECTION</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. Rank Journey Modal (AAA Redesign) -->
+        <div id="rank-journey-modal" class="modal-overlay hidden-modal">
+            <div class="profile-card" style="max-width: 720px; height: 85%; padding: 0; background: #0c0c10; border: 1px solid rgba(223, 183, 108, 0.2); overflow: hidden; display: flex; flex-direction: column;">
+                <button class="modal-close-btn" onclick="closeRankJourneyPanel()" style="z-index: 10;">×</button>
+                
+                <!-- Premium Header -->
+                <div style="background: linear-gradient(135deg, #1d1912 0%, #0c0c10 100%); padding: 30px; position: relative; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <!-- Glow effect -->
+                    <div style="position: absolute; right: -50px; top: -50px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(223,183,108,0.15) 0%, transparent 70%); border-radius: 50%;"></div>
+                    <div style="display: flex; align-items: center; gap: 20px; position: relative; z-index: 1;">
+                        <span style="font-size: 42px; filter: drop-shadow(0 0 10px rgba(223,183,108,0.5));">🏆</span>
+                        <div style="text-align: left;">
+                            <h3 style="font-family: var(--font-display); font-size:24px; color:#fff; letter-spacing:2px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); margin: 0;">MY RANK JOURNEY</h3>
+                            <p style="font-size: 11px; color: var(--gold); letter-spacing:1px; margin-top: 4px; font-weight: 700;">PRESTIGE BEYOND SKILLS</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Journey Content Grid -->
+                <div class="journey-container">
+                    <div style="position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(180deg, rgba(12,12,16,0.8) 0%, rgba(12,12,16,1) 100%);"></div>
+                    
+                    <!-- Left ladder ranks -->
+                    <div class="journey-left-menu" id="journey-ranks-menu">
+                        <div class="skeleton-item"></div>
+                        <div class="skeleton-item" style="margin-top: 8px;"></div>
+                        <div class="skeleton-item" style="margin-top: 8px;"></div>
+                    </div>
+                    
+                    <!-- Right dynamic rewards details -->
+                    <div class="journey-right-scroll" id="journey-rewards-scroller">
+                        <div class="skeleton-item" style="height: 120px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. Quick Match Radar Matching Overlay -->
+        <div id="quick-match-modal" class="modal-overlay hidden-modal">
+            <div class="profile-card" style="max-width: 420px; height: auto; padding: 10px; text-align: center;">
+                <button class="modal-close-btn" onclick="closeQuickMatchRadar()">✖</button>
+                <h3 style="font-family: var(--font-display); color:#fff; font-size: 16px; margin-top: 24px; letter-spacing: 2px;">SEARCHING OPPONENT</h3>
+                <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">QUEUING IN THE GLOBAL SERVER REGISTRY...</p>
+                
+                <!-- Radar scanning graphic -->
+                <div class="radar-scanning-box">
+                    <div class="radar-scanning-sweep"></div>
+                </div>
+                
+                <p style="font-size: 12px; color: var(--gold); font-family: var(--font-mono);" id="radar-status-state">MATCHMAKING STANDBY: 0s</p>
+                
+                <button class="btn btn-outline" onclick="closeQuickMatchRadar()" style="border-color: #444; color:#888; max-width: 200px; margin: 16px auto; font-size: 11px;">CANCEL QUEUE</button>
+            </div>
+        </div>
+
+        <!-- 10. Match Result Overlay (Sleek Free Fire style rewards) -->
+        <div id="match-result-overlay" class="victory-overlay hidden-modal">
+            <div class="victory-title-card" id="match-victory-card">
+                <span style="font-size: 54px; filter: drop-shadow(0 0 10px rgba(223,183,108,0.3));" id="match-victory-icon">🔥</span>
+                <h1 class="victory-banner-text" id="match-victory-banner">VICTORY</h1>
+                <p id="match-victory-subtitle" style="font-family:var(--font-body); font-weight:800; font-size:12px; letter-spacing: 2px; color: #fff; margin-top: 4px;">CHECKMATE SECURED</p>
+                
+                <div style="display:flex; justify-content:center; gap:20px; margin-top:24px;">
+                    <div style="background: rgba(0,0,0,0.5); padding: 12px 20px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                        <div style="color:var(--gold); font-family:var(--font-mono); font-size:20px; font-weight:800;" id="match-victory-coins">+50</div>
+                        <div style="font-size:8px; color: var(--text-muted); font-weight:700;">COINS EARNED</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.5); padding: 12px 20px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                        <div style="color:var(--blue-accent); font-family:var(--font-mono); font-size:20px; font-weight:800;" id="match-victory-xp">+50</div>
+                        <div style="font-size:8px; color: var(--text-muted); font-weight:700;">XP EARNED</div>
+                    </div>
+                    <div id="match-result-rp-card" style="background: rgba(0,0,0,0.5); padding: 12px 20px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                        <div style="color:#4af626; font-family:var(--font-mono); font-size:20px; font-weight:800;" id="match-victory-rp">+25</div>
+                        <div style="font-size:8px; color: var(--text-muted); font-weight:700;">RP RATING</div>
+                    </div>
+                </div>
+
+                <!-- RP progression animations -->
+                <div class="victory-rank-scale-field">
+                    <div style="display:flex; justify-content:space-between; font-size:11px; color:#fff; font-weight:700;">
+                        <span id="match-result-old-rank">Pawn II (65 RP)</span>
+                        <span style="color:var(--gold);" id="match-result-new-rank">Pawn II (90 RP)</span>
+                    </div>
+                    
+                    <div class="victory-progress-bg">
+                        <div class="victory-progress-bar" id="match-result-rp-bar"></div>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="closeMatchResultOverlay()" style="background: linear-gradient(135deg, var(--gold-dark), var(--gold)); color: #000; border:none; padding:14px; font-weight:800; border-radius:6px; max-width: 250px; margin: 30px auto 0 auto;">
+                    CLAIM REWARDS
+                </button>
+            </div>
+        </div>
+
+        <!-- 11. Full Screen Promotion overlay -->
+        <div id="rank-promotion-overlay" class="promotion-screen-overlay hidden-modal">
+            <div id="promo-particles" class="promo-particles"></div>
+            <span style="font-size: 72px; animation: pulseGlow 2s infinite ease-in-out;">👑</span>
+            <h1 class="promo-rankup-title" id="promo-title-text">GRAND PROMOTION</h1>
+            <p style="font-size: 14px; letter-spacing: 3px; font-weight:700; color: #fff; margin-top: 8px;" id="promo-subtitle-text">NEW RANK UNLOCKED!</p>
+            
+            <div style="display:flex; align-items:center; gap:20px; margin: 30px 0;">
+                <div style="text-align:center;">
+                    <div style="font-size:11px; color: var(--text-muted);">PREVIOUS</div>
+                    <div style="font-size:18px; color: #aaa; font-weight:700; font-family:var(--font-display);" id="promo-old-rank-name">Pawn II</div>
+                </div>
+                <span style="font-size: 24px; color:var(--gold);">➔</span>
+                <div style="text-align:center;">
+                    <div style="font-size:11px; color:var(--gold); font-weight:800;">CURRENT</div>
+                    <div style="font-size:20px; color: #fff; font-weight:900; font-family:var(--font-display); text-shadow: 0 0 10px var(--gold);" id="promo-new-rank-name">Pawn III</div>
+                </div>
+            </div>
+
+            <p style="font-size:11px; color:var(--text-muted); margin-bottom:20px;">You unlocked new titles and frames options inside Store!</p>
+            <button class="btn btn-primary" onclick="closeRankPromotionOverlay()" style="background: #fff; color: #000; border:none; font-weight:800; border-radius:4px; max-width: 200px; padding:12px 30px;">AWESOME</button>
+        </div>
+
+        <!-- 12. Match History Log Modal -->
+        <div id="match-history-modal" class="modal-overlay hidden-modal">
+            <div class="profile-card" style="max-width: 480px;">
+                <button class="modal-close-btn" onclick="closeMatchHistoryPanel()">✖</button>
+                <div class="profile-gold-banner" style="background:#0c0d12; border-bottom:1px solid #222;">
+                    <span style="font-size: 32px">📜</span>
+                    <div style="text-align: left;">
+                        <h3 style="font-family: var(--font-display); font-size: 14px; color: #fff; letter-spacing: 1px;">MATCH HISTORY</h3>
+                        <p style="font-size: 10px; color: var(--text-muted); letter-spacing: 0.5px;">YOUR CAREER TOURNAMENT LOG ARCHIVES</p>
+                    </div>
+                </div>
+                
+                <div id="v3-history-scroller" style="flex:1; overflow-y:auto; padding: 16px; display:flex; flex-direction:column; gap:8px;">
+                    <div class="skeleton-item"></div>
+                    <div class="skeleton-item"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 13. Collection Panel Modal -->
+        <div id="collection-modal" class="modal-overlay hidden-modal">
+            <div class="profile-card" style="max-width: 480px;">
+                <button class="modal-close-btn" onclick="closeCollectionModal()">✖</button>
+                <div class="profile-gold-banner" style="background:#141416;">
+                    <span style="font-size: 32px">🎒</span>
+                    <div style="text-align: left;">
+                        <h3 style="font-family: var(--font-display); font-size: 14px; color: #fff; letter-spacing: 1px;">MY COLLECTION</h3>
+                        <p style="font-size: 10px; color: var(--gold); letter-spacing: 0.5px;">UNLOCKED CUSTOMIZATIONS BADGES & ACCESSORIES</p>
+                    </div>
+                </div>
+                
+                <div id="collection-items-scroller" style="flex: 1; overflow-y: auto; padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div class="skeleton-item" style="height: 90px;"></div>
+                    <div class="skeleton-item" style="height: 90px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inject source code files -->
+    <!-- Firebase App and Firestore SDK Loader (Standard Compatibility Mode) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script>
+        // Global error catcher for diagnostics
+        window.onerror = function(message, source, lineno, colno, error) {
+            console.error("GLOBAL PROCESS ERROR captured:", message, "at", source, ":", lineno);
+            try {
+                if (typeof showToast === 'function') {
+                    showToast("ALERT: " + message + " (Line " + lineno + ")");
+                }
+            } catch (fallbackErr) {
+                alert("CRITICAL ERROR: " + message + " (Line: " + lineno + ")");
+            }
+            return false;
+        };
+
+        // ── Firebase bootstrap ────────────────────────────────────────────────
+        // IMPORTANT: Do NOT use `const` or `var` here — a global-scope `const`
+        // blocks multiplayer.js from re-declaring `var firebaseConfig` and causes:
+        //   "Identifier 'firebaseConfig' has already been declared"
+        // Store on window directly so multiplayer.js reads it via:
+        //   var firebaseConfig = window.firebaseConfig || {...}
+        window.firebaseConfig = {
+            apiKey: "AIzaSyCeAsOzVgxSMuDuTZEXJbihhKW0l-h_wTg",
+            authDomain: "d-chess-93c79.firebaseapp.com",
+            projectId: "d-chess-93c79",
+            storageBucket: "d-chess-93c79.firebasestorage.app",
+            appId: "1:626616850612:android:a9ccabb5bf86092b9c1fe1"
+        };
+        if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+            firebase.initializeApp(window.firebaseConfig);
+        }
+
+        // Secure context fallback for document copying in Android WebView (file:// protocol)
+        window.fallbackCopyText = function(text) {
+            try {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.top = "0";
+                textArea.style.left = "0";
+                textArea.style.opacity = "0";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                return successful;
+            } catch (err) {
+                console.error("fallbackCopyText failed:", err);
+                return false;
+            }
+        };
+
+        window.safelyCopyText = function(text) {
+            if (window.AndroidApp && window.AndroidApp.copyToClipboard) {
+                try {
+                    window.AndroidApp.copyToClipboard(text);
+                    console.log("Copied using AndroidApp Native Bridge");
+                    return Promise.resolve(true);
+                } catch(e) {
+                    console.warn("AndroidApp copyToClipboard failed: ", e);
+                }
+            }
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                return navigator.clipboard.writeText(text).then(function() {
+                    return true;
+                }).catch(function(e) {
+                    console.warn("navigator.clipboard error, fallbacking...", e);
+                    return window.fallbackCopyText(text);
+                });
+            } else {
+                return Promise.resolve(window.fallbackCopyText(text));
+            }
+        };
+    </script>
+    
+    <!-- ============================================================
+         SCRIPT LOADING ORDER (strictly enforced for correct runtime):
+         1. Firebase SDKs (loaded above in <head>)
+         2. ftech_v2_system.js  — Core account/auth system
+         3. chess_engine.js     — Chess rules engine
+         4. multiplayer.js      — Network module (must be BEFORE chess_3d.js)
+                                   Exposes: window.ChessMultiplayer, window.getChessMultiplayer
+         5. ftech_v3_ui.js      — UI modals and lobby system
+         6. chess_3d.js         — 3D renderer (reads window.ChessMultiplayer)
+         ============================================================ -->
+    <script src="ftech_social.js"></script>
+    <script src="ftech_v2_system.js"></script>
+    <script src="chess_engine.js"></script>
+    <script src="multiplayer.js"></script>
+    <script src="ftech_v3_ui.js"></script>
+    <script src="chess_3d.js"></script>
+<div id="private-chat-modal" class="modal-overlay hidden-modal"><div class="profile-card" style="max-width: 400px; height: 80vh; display: flex; flex-direction: column;"><div style="display:flex; align-items:center; gap:12px; padding:16px; border-bottom:1px solid var(--border-color); background:rgba(0,0,0,0.5);"><button class="btn" onclick="document.getElementById('private-chat-modal').style.display='none';" style="padding:8px;">?</button><div style="width:36px; height:36px; border-radius:50%; background:#2a2a35; border:1px solid var(--gold);"></div><div style="flex:1;"><div id="chat-header-name" style="font-weight:bold; font-size:14px; color:#fff;">Player</div><div id="chat-header-status" style="font-size:10px; color:#0f0;">Online</div></div><button class="btn btn-primary" style="padding:6px 12px; font-size:10px;">INVITE</button></div><div id="chat-messages-container" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; background:rgba(0,0,0,0.2);"></div><div style="padding:16px; border-top:1px solid var(--border-color); background:rgba(0,0,0,0.5); display:flex; gap:8px;"><button class="btn" style="padding:10px;">??</button><input type="text" id="chat-input-box" placeholder="Type a message..." style="flex:1; background:rgba(0,0,0,0.6); border:1px solid var(--border-color); border-radius:20px; padding:0 16px; color:#fff; outline:none;" onkeypress="if(event.key === 'Enter') FtechSocial.sendChatMessage()"><button class="btn btn-primary" onclick="FtechSocial.sendChatMessage()" style="padding:10px 16px; border-radius:20px;">SEND</button></div></div></div><div id="party-lobby-modal" class="modal-overlay hidden-modal"><div class="profile-card" style="max-width: 600px; padding: 24px;"><h2 style="font-family: var(--font-display); color: #fff; margin-bottom: 20px;">PARTY LOBBY</h2><div id="party-slots-container" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px;"><div class="party-slot" style="background: rgba(0,0,0,0.4); border: 1px solid var(--gold); border-radius: 8px; padding: 16px; text-align: center;"><div style="width: 48px; height: 48px; border-radius: 50%; background: #2a2a35; margin: 0 auto 8px auto;"></div><div style="font-size: 12px; color: #fff; font-weight: bold;">Leader</div></div><div class="party-slot empty" style="background: rgba(0,0,0,0.2); border: 1px dashed var(--border-color); border-radius: 8px; padding: 16px; text-align: center; cursor: pointer;"><div style="font-size: 24px; color: var(--text-muted); margin-bottom: 8px;">+</div><div style="font-size: 10px; color: var(--text-muted);">INVITE</div></div><div class="party-slot empty" style="background: rgba(0,0,0,0.2); border: 1px dashed var(--border-color); border-radius: 8px; padding: 16px; text-align: center; cursor: pointer;"><div style="font-size: 24px; color: var(--text-muted); margin-bottom: 8px;">+</div><div style="font-size: 10px; color: var(--text-muted);">INVITE</div></div><div class="party-slot empty" style="background: rgba(0,0,0,0.2); border: 1px dashed var(--border-color); border-radius: 8px; padding: 16px; text-align: center; cursor: pointer;"><div style="font-size: 24px; color: var(--text-muted); margin-bottom: 8px;">+</div><div style="font-size: 10px; color: var(--text-muted);">INVITE</div></div></div><div style="display: flex; gap: 16px;"><button class="btn btn-outline" style="flex: 1; padding: 12px;" onclick="document.getElementById('party-lobby-modal').style.display='none';">LEAVE PARTY</button><button class="btn btn-primary" style="flex: 2; padding: 12px; font-size: 14px;">START MATCH</button></div></div></div></body>
+</html>
+<!-- DEBUG MONITORS -->
+<div id="debug-monitor" style="position: fixed; bottom: 80px; left: 10px; z-index: 9999; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px; font-family: var(--font-mono); font-size: 10px; color: #0f0; pointer-events: none; display: none;">
+    <div id="fps-counter">FPS: --</div>
+    <div id="mem-counter">MEM: --</div>
+</div>
+
+
+
+
+
+
